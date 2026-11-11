@@ -12,16 +12,25 @@
 .swiftpm/
 migrate_working_dir/
 
-# IntelliJ related
+# IntelliJ / Android Studio
 *.iml
 *.ipr
 *.iws
 .idea/
 
 # VS Code
-#.vscode/
+.vscode/
 
-# Flutter/Dart/Pub related
+# Node / Backend
+**/node_modules/
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/.env
+**/.env.*
+!**/.env.example
+
+# Flutter / Dart / Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
@@ -36,19 +45,22 @@ coverage/
 # Flutter metadata
 .metadata
 
-# Symbolication related
+# Symbolication & Obfuscation
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
+# Android Studio / Gradle build artifacts
 **/android/app/debug
 **/android/app/profile
 **/android/app/release
+.gradle/
+local.properties
+
+# iOS / macOS build files
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
 
 # Widget Preview related
 .widget_preview/
-
-# Lock file (optional — keep if you want reproducible builds)
-# pubspec.lock

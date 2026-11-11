@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'user.dart';
+import 'api_service.dart' as api;
 import 'register_page.dart';
-import 'profile_page.dart';
+import 'notes_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,28 +14,52 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void login() {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
+  bool loading = false;
 
-    if (registeredUser == null) {
+  void doLogin() async {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No account found. Please register first.')),
+        const SnackBar(content: Text('Please fill all fields')),
       );
       return;
     }
 
-    if (email != registeredUser!.email || password != registeredUser!.password) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Wrong email or password.')),
-      );
-      return;
+    setState(() {
+      loading = true;
+    });
+
+    String? error;
+
+    try {
+      error = await api.login(email, password);
+    } catch (e) {
+      error = 'Cannot connect to server';
     }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const ProfilePage()),
-    );
+    setState(() {
+      loading = false;
+    });
+
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error)),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const NotesPage()),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -46,42 +70,49 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Image.asset('pictures/logo.png', height: 120),
+            const SizedBox(height: 40),
+            const Text('Welcome Back', style: TextStyle(fontSize: 28)),
             const SizedBox(height: 32),
+
             TextField(
               controller: emailController,
               decoration: const InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: TextInputType.emailAddress,
             ),
+
             const SizedBox(height: 16),
+
             TextField(
               controller: passwordController,
+              obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'Password',
                 border: OutlineInputBorder(),
               ),
-              obscureText: true,
             ),
+
             const SizedBox(height: 24),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: login,
-                child: const Text('Login'),
+                onPressed: loading ? null : doLogin,
+                child: loading
+                    ? const CircularProgressIndicator()
+                    : const Text('Login'),
               ),
             ),
-            const SizedBox(height: 12),
+
             TextButton(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const RegisterPage()),
+                  MaterialPageRoute(builder: (context) => const RegisterPage()),
                 );
               },
-              child: const Text('Don\'t have an account? Register'),
+              child: const Text("Don't have an account? Register"),
             ),
           ],
         ),

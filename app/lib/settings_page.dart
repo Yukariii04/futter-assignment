@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
+import 'api_service.dart' as api;
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -27,6 +28,7 @@ class _SettingsPageState extends State<SettingsPage> {
               });
             },
           ),
+
           SwitchListTile(
             title: const Text('Sound'),
             value: soundOn,
@@ -36,15 +38,19 @@ class _SettingsPageState extends State<SettingsPage> {
               });
             },
           ),
+
           const Divider(),
+
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text('Log out', style: TextStyle(color: Colors.red)),
             onTap: () {
+              api.logout();
+
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (_) => const LoginPage()),
-                (_) => false,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+                (route) => false,
               );
             },
           ),
