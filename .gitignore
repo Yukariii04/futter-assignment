@@ -29,6 +29,7 @@ migrate_working_dir/
 **/.env
 **/.env.*
 !**/.env.example
+/backend/.env
 
 # Flutter / Dart / Pub related
 **/doc/api/
