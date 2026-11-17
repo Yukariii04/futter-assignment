@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'user.dart';
+import 'api_service.dart' as api;
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -14,26 +14,56 @@ class _RegisterPageState extends State<RegisterPage> {
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void register() {
-    final name = nameController.text.trim();
-    final email = emailController.text.trim();
-    final phone = phoneController.text.trim();
-    final password = passwordController.text.trim();
+  bool loading = false;
+
+  void doRegister() async {
+    String name = nameController.text.trim();
+    String email = emailController.text.trim();
+    String phone = phoneController.text.trim();
+    String password = passwordController.text.trim();
 
     if (name.isEmpty || email.isEmpty || phone.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in every box.')),
+        const SnackBar(content: Text('Please fill all fields')),
       );
       return;
     }
 
-    registeredUser = User(name: name, email: email, phone: phone, password: password);
+    setState(() {
+      loading = true;
+    });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Registered! You can now log in.')),
-    );
+    String? error;
 
-    Navigator.pop(context);
+    try {
+      error = await api.register(name, email, phone, password);
+    } catch (e) {
+      error = 'Cannot connect to server';
+    }
+
+    setState(() {
+      loading = false;
+    });
+
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error)),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Registered successfully')),
+      );
+      Navigator.pop(context);
+    }
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -44,8 +74,8 @@ class _RegisterPageState extends State<RegisterPage> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Image.asset('pictures/logo.png', height: 120),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
+
             TextField(
               controller: nameController,
               decoration: const InputDecoration(
@@ -53,39 +83,49 @@ class _RegisterPageState extends State<RegisterPage> {
                 border: OutlineInputBorder(),
               ),
             ),
+
             const SizedBox(height: 16),
+
             TextField(
               controller: emailController,
+              keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: TextInputType.emailAddress,
             ),
+
             const SizedBox(height: 16),
+
             TextField(
               controller: phoneController,
+              keyboardType: TextInputType.phone,
               decoration: const InputDecoration(
                 labelText: 'Phone',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: TextInputType.phone,
             ),
+
             const SizedBox(height: 16),
+
             TextField(
               controller: passwordController,
+              obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'Password',
                 border: OutlineInputBorder(),
               ),
-              obscureText: true,
             ),
+
             const SizedBox(height: 24),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: register,
-                child: const Text('Register'),
+                onPressed: loading ? null : doRegister,
+                child: loading
+                    ? const CircularProgressIndicator()
+                    : const Text('Register'),
               ),
             ),
           ],
